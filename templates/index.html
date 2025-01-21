@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Transactions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        textarea {
+            width: 80%;
+            height: 300px;
+        }
+        input[type="text"] {
+            width: 60%;
+            padding: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blockchain Transactions</h1>
+    <h2>TCS 407 Lab Work 1 by Group 2</h2>
+    <form id="add-block-form">
+        <input type="text" name="data" placeholder="Enter data for new block" required>
+        <button type="submit">Add Block</button>
+    </form>
+    <button onclick="fetchChain()">View Blockchain</button>
+    <button onclick="verifyChain()">Verify Blockchain</button>
+    <textarea id="blockchain-display" readonly></textarea>
+
+    <script>
+        async function fetchChain() {
+            const response = await fetch("/get_chain");
+            const data = await response.json();
+            const chain = data.chain.map(block => `
+                Index: ${block.index}
+                Timestamp: ${block.timestamp}
+                Data: ${block.data}
+                Previous Hash: ${block.previous_hash}
+                Hash: ${block.hash}
+                -----------------------------
+            `).join("\\n");
+            document.getElementById("blockchain-display").value = chain;
+        }
+
+        async function verifyChain() {
+            const response = await fetch("/verify_chain");
+            const data = await response.json();
+            alert(data.message);
+        }
+
+        document.getElementById("add-block-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const response = await fetch("/add_block", {
+                method: "POST",
+                body: formData
+            });
+            const data = await response.json();
+            alert(data.message);
+            event.target.reset();
+        });
+    </script>
+</body>
+</html>
